@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { BrandLogo } from "./logo";
 
 export const metadata: Metadata = {
   title: "Morning Brief",
@@ -34,23 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               gap: "1rem",
             }}
           >
-            <a className="brand-logo" href="/" aria-label="AI Build Lab home">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/assets/aibuildlab-logo.svg"
-                alt="AI Build Lab"
-                onError={(e) => {
-                  const t = e.currentTarget;
-                  t.style.display = "none";
-                  const fallback = t.nextElementSibling as HTMLElement | null;
-                  if (fallback) fallback.style.display = "flex";
-                }}
-              />
-              <div className="logo-fallback">
-                <span className="slash">/</span>
-                <span className="bar">|</span>buildlab
-              </div>
-            </a>
+            <BrandLogo />
             <span className="kicker">
               <span className="live-dot" />
               MORNING BRIEF / capstone build
