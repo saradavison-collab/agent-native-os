@@ -1,3 +1,4 @@
+import React from "react";
 import type { Brief } from "@/lib/brief-contract";
 import { supabaseAdmin } from "@/lib/supabase";
 
@@ -61,6 +62,45 @@ export default async function Page() {
   );
 }
 
+function renderBody(body: string) {
+  const lines = body.split("\n");
+  const elements: React.ReactNode[] = [];
+  let bulletGroup: string[] = [];
+  let key = 0;
+
+  const flushBullets = () => {
+    if (bulletGroup.length === 0) return;
+    elements.push(
+      <ul key={key++} style={{ margin: "0.3rem 0 0.5rem 1.1rem", padding: 0, display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+        {bulletGroup.map((b, i) => (
+          <li key={i} style={{ color: "var(--ink-2)", fontSize: "0.92rem", lineHeight: 1.5 }}
+            dangerouslySetInnerHTML={{ __html: b.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>") }} />
+        ))}
+      </ul>
+    );
+    bulletGroup = [];
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushBullets();
+      continue;
+    }
+    if (trimmed.startsWith("- ")) {
+      bulletGroup.push(trimmed.slice(2));
+    } else {
+      flushBullets();
+      elements.push(
+        <p key={key++} style={{ color: "var(--ink-2)", fontSize: "0.92rem", lineHeight: 1.5, margin: "0.2rem 0" }}
+          dangerouslySetInnerHTML={{ __html: trimmed.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>") }} />
+      );
+    }
+  }
+  flushBullets();
+  return elements;
+}
+
 function BriefCard({ brief }: { brief: Brief }) {
   return (
     <div className="file-tab-card tilt-left" style={{ marginTop: "1.6rem" }}>
@@ -82,11 +122,17 @@ function BriefCard({ brief }: { brief: Brief }) {
         </div>
         <div style={{ fontWeight: 600 }}>{brief.top_priority}</div>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
         {brief.sections.map((s, i) => (
-          <div key={i}>
-            <h3 className="font-display" style={{ fontSize: "1.1rem", marginBottom: "0.2rem" }}>{s.heading}</h3>
-            <p style={{ color: "var(--ink-2)", fontSize: "0.95rem", whiteSpace: "pre-wrap" }}>{s.body}</p>
+          <div key={i} style={{
+            borderTop: i === 0 ? "none" : "1px dashed var(--border)",
+            paddingTop: i === 0 ? "0" : "0.9rem",
+            marginTop: i === 0 ? "0" : "0.9rem",
+          }}>
+            <div className="font-mono" style={{ fontSize: "0.62rem", color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.4rem" }}>
+              {s.heading}
+            </div>
+            {renderBody(s.body)}
           </div>
         ))}
       </div>
